@@ -1,0 +1,5 @@
+[aws]
+35.156.82.159
+
+[aws:vars]
+ansible_user=ubuntu

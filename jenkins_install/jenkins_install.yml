@@ -1,0 +1,27 @@
+#wget -q -O - https://pkg.jenkins.io/debian/jenkins-ci.org.key | sudo apt-key add -
+#sudo sh -c 'echo deb http://pkg.jenkins.io/debian-stable binary/ > /etc/apt/sources.list.d/jenkins.list'
+#sudo apt-get update
+#sudo apt-get install jenkins
+---
+- hosts: aws
+  vars: 
+    adminKeyJenkins: "{{ lookup('file', '/var/lib/jenkins/secrets/initialAdminPassword') }}"
+  become: true
+  become_method: sudo
+  become_user: root
+  tasks:
+  - name: add key to jenkins repo to accepted keys
+    apt_key:  url=https://pkg.jenkins.io/debian/jenkins-ci.org.key state=present
+  - name: add jenkins source to source list
+    apt_repository: repo='deb http://pkg.jenkins.io/debian-stable binary/' state=present update_cache=yes
+  - name:  apt-get update
+    raw: /usr/bin/apt-get update -qq
+  - name: Install jenkins
+    apt: name=jenkins 
+  - name: Ensure jenkins is running
+    service:
+      name: jenkins
+      state: started
+  - name: Jenkins admin password
+    debug: msg="admin password is stored in /var/lib/jenkins/secrets/initialAdminPassword"
+    
